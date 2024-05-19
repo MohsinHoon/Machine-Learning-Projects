@@ -1,0 +1,663 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyNxABkjIC2rAS9zo6rB5/rj",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/MohsinHoon/Machine-Learning-Projects/blob/main/Drug%20Label%20Text%20Extractor%20%7C%20Paddle%20OCR\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 1,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "5hMkSTKYkEl2",
+        "outputId": "4f1decaf-eaec-4ec3-d675-6ea8c96e2085",
+        "collapsed": true
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Looking in indexes: https://mirror.baidu.com/pypi/simple\n",
+            "Collecting paddlepaddle\n",
+            "  Downloading https://mirror.baidu.com/pypi/packages/ce/8c/e0003e2cbc79211d7758c395f335e3d27270e7b55c5a9387cfaf4815c919/paddlepaddle-2.6.1-cp310-cp310-manylinux1_x86_64.whl (125.9 MB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m125.9/125.9 MB\u001b[0m \u001b[31m3.5 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hCollecting httpx (from paddlepaddle)\n",
+            "  Downloading https://mirror.baidu.com/pypi/packages/41/7b/ddacf6dcebb42466abd03f368782142baa82e08fc0c1f8eaa05b4bae87d5/httpx-0.27.0-py3-none-any.whl (75 kB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m75.6/75.6 kB\u001b[0m \u001b[31m7.1 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hRequirement already satisfied: numpy>=1.13 in /usr/local/lib/python3.10/dist-packages (from paddlepaddle) (1.25.2)\n",
+            "Requirement already satisfied: Pillow in /usr/local/lib/python3.10/dist-packages (from paddlepaddle) (9.4.0)\n",
+            "Requirement already satisfied: decorator in /usr/local/lib/python3.10/dist-packages (from paddlepaddle) (4.4.2)\n",
+            "Collecting astor (from paddlepaddle)\n",
+            "  Downloading https://mirror.baidu.com/pypi/packages/c3/88/97eef84f48fa04fbd6750e62dcceafba6c63c81b7ac1420856c8dcc0a3f9/astor-0.8.1-py2.py3-none-any.whl (27 kB)\n",
+            "Requirement already satisfied: opt-einsum==3.3.0 in /usr/local/lib/python3.10/dist-packages (from paddlepaddle) (3.3.0)\n",
+            "Requirement already satisfied: protobuf>=3.20.2 in /usr/local/lib/python3.10/dist-packages (from paddlepaddle) (3.20.3)\n",
+            "Requirement already satisfied: anyio in /usr/local/lib/python3.10/dist-packages (from httpx->paddlepaddle) (3.7.1)\n",
+            "Requirement already satisfied: certifi in /usr/local/lib/python3.10/dist-packages (from httpx->paddlepaddle) (2024.2.2)\n",
+            "Collecting httpcore==1.* (from httpx->paddlepaddle)\n",
+            "  Downloading https://mirror.baidu.com/pypi/packages/78/d4/e5d7e4f2174f8a4d63c8897d79eb8fe2503f7ecc03282fee1fa2719c2704/httpcore-1.0.5-py3-none-any.whl (77 kB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m77.9/77.9 kB\u001b[0m \u001b[31m9.8 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hRequirement already satisfied: idna in /usr/local/lib/python3.10/dist-packages (from httpx->paddlepaddle) (3.7)\n",
+            "Requirement already satisfied: sniffio in /usr/local/lib/python3.10/dist-packages (from httpx->paddlepaddle) (1.3.1)\n",
+            "Collecting h11<0.15,>=0.13 (from httpcore==1.*->httpx->paddlepaddle)\n",
+            "  Downloading https://mirror.baidu.com/pypi/packages/95/04/ff642e65ad6b90db43e668d70ffb6736436c7ce41fcc549f4e9472234127/h11-0.14.0-py3-none-any.whl (58 kB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m58.3/58.3 kB\u001b[0m \u001b[31m7.1 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hRequirement already satisfied: exceptiongroup in /usr/local/lib/python3.10/dist-packages (from anyio->httpx->paddlepaddle) (1.2.1)\n",
+            "Installing collected packages: h11, astor, httpcore, httpx, paddlepaddle\n",
+            "Successfully installed astor-0.8.1 h11-0.14.0 httpcore-1.0.5 httpx-0.27.0 paddlepaddle-2.6.1\n"
+          ]
+        }
+      ],
+      "source": [
+        "# @title\n",
+        "!python -m pip install paddlepaddle -i https://mirror.baidu.com/pypi/simple"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Install paddle OCR\n",
+        "!pip install paddleocr"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 1000
+        },
+        "id": "h9fXj7pkAloG",
+        "outputId": "4514f36d-862b-4e98-c016-04508887b45c",
+        "collapsed": true
+      },
+      "execution_count": 2,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Collecting paddleocr\n",
+            "  Downloading paddleocr-2.7.3-py3-none-any.whl (780 kB)\n",
+            "\u001b[?25l     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m0.0/780.0 kB\u001b[0m \u001b[31m?\u001b[0m eta \u001b[36m-:--:--\u001b[0m\r\u001b[2K     \u001b[91m━━━━━━━━\u001b[0m\u001b[91m╸\u001b[0m\u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m174.1/780.0 kB\u001b[0m \u001b[31m5.3 MB/s\u001b[0m eta \u001b[36m0:00:01\u001b[0m\r\u001b[2K     \u001b[91m━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m\u001b[91m╸\u001b[0m\u001b[90m━━━━━━━━━━━━━━\u001b[0m \u001b[32m501.8/780.0 kB\u001b[0m \u001b[31m7.2 MB/s\u001b[0m eta \u001b[36m0:00:01\u001b[0m\r\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m780.0/780.0 kB\u001b[0m \u001b[31m7.6 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hRequirement already satisfied: shapely in /usr/local/lib/python3.10/dist-packages (from paddleocr) (2.0.4)\n",
+            "Requirement already satisfied: scikit-image in /usr/local/lib/python3.10/dist-packages (from paddleocr) (0.19.3)\n",
+            "Requirement already satisfied: imgaug in /usr/local/lib/python3.10/dist-packages (from paddleocr) (0.4.0)\n",
+            "Collecting pyclipper (from paddleocr)\n",
+            "  Downloading pyclipper-1.3.0.post5-cp310-cp310-manylinux_2_12_x86_64.manylinux2010_x86_64.whl (908 kB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m908.3/908.3 kB\u001b[0m \u001b[31m13.2 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hCollecting lmdb (from paddleocr)\n",
+            "  Downloading lmdb-1.4.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (299 kB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m299.2/299.2 kB\u001b[0m \u001b[31m13.2 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hRequirement already satisfied: tqdm in /usr/local/lib/python3.10/dist-packages (from paddleocr) (4.66.4)\n",
+            "Requirement already satisfied: numpy in /usr/local/lib/python3.10/dist-packages (from paddleocr) (1.25.2)\n",
+            "Collecting visualdl (from paddleocr)\n",
+            "  Downloading visualdl-2.5.3-py3-none-any.whl (6.3 MB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m6.3/6.3 MB\u001b[0m \u001b[31m29.7 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hCollecting rapidfuzz (from paddleocr)\n",
+            "  Downloading rapidfuzz-3.9.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (3.4 MB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m3.4/3.4 MB\u001b[0m \u001b[31m54.5 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hCollecting opencv-python<=4.6.0.66 (from paddleocr)\n",
+            "  Downloading opencv_python-4.6.0.66-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (60.9 MB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m60.9/60.9 MB\u001b[0m \u001b[31m9.3 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hCollecting opencv-contrib-python<=4.6.0.66 (from paddleocr)\n",
+            "  Downloading opencv_contrib_python-4.6.0.66-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (67.1 MB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m67.1/67.1 MB\u001b[0m \u001b[31m5.5 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hRequirement already satisfied: cython in /usr/local/lib/python3.10/dist-packages (from paddleocr) (3.0.10)\n",
+            "Requirement already satisfied: lxml in /usr/local/lib/python3.10/dist-packages (from paddleocr) (4.9.4)\n",
+            "Collecting premailer (from paddleocr)\n",
+            "  Downloading premailer-3.10.0-py2.py3-none-any.whl (19 kB)\n",
+            "Requirement already satisfied: openpyxl in /usr/local/lib/python3.10/dist-packages (from paddleocr) (3.1.2)\n",
+            "Collecting attrdict (from paddleocr)\n",
+            "  Downloading attrdict-2.0.1-py2.py3-none-any.whl (9.9 kB)\n",
+            "Collecting Pillow>=10.0.0 (from paddleocr)\n",
+            "  Downloading pillow-10.3.0-cp310-cp310-manylinux_2_28_x86_64.whl (4.5 MB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m4.5/4.5 MB\u001b[0m \u001b[31m90.2 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hRequirement already satisfied: pyyaml in /usr/local/lib/python3.10/dist-packages (from paddleocr) (6.0.1)\n",
+            "Collecting python-docx (from paddleocr)\n",
+            "  Downloading python_docx-1.1.2-py3-none-any.whl (244 kB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m244.3/244.3 kB\u001b[0m \u001b[31m28.6 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hRequirement already satisfied: beautifulsoup4 in /usr/local/lib/python3.10/dist-packages (from paddleocr) (4.12.3)\n",
+            "Requirement already satisfied: fonttools>=4.24.0 in /usr/local/lib/python3.10/dist-packages (from paddleocr) (4.51.0)\n",
+            "Collecting fire>=0.3.0 (from paddleocr)\n",
+            "  Downloading fire-0.6.0.tar.gz (88 kB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m88.4/88.4 kB\u001b[0m \u001b[31m12.7 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25h  Preparing metadata (setup.py) ... \u001b[?25l\u001b[?25hdone\n",
+            "Collecting pdf2docx (from paddleocr)\n",
+            "  Downloading pdf2docx-0.5.8-py3-none-any.whl (132 kB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m132.0/132.0 kB\u001b[0m \u001b[31m19.5 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hRequirement already satisfied: six in /usr/local/lib/python3.10/dist-packages (from fire>=0.3.0->paddleocr) (1.16.0)\n",
+            "Requirement already satisfied: termcolor in /usr/local/lib/python3.10/dist-packages (from fire>=0.3.0->paddleocr) (2.4.0)\n",
+            "Requirement already satisfied: soupsieve>1.2 in /usr/local/lib/python3.10/dist-packages (from beautifulsoup4->paddleocr) (2.5)\n",
+            "Requirement already satisfied: scipy in /usr/local/lib/python3.10/dist-packages (from imgaug->paddleocr) (1.11.4)\n",
+            "Requirement already satisfied: matplotlib in /usr/local/lib/python3.10/dist-packages (from imgaug->paddleocr) (3.7.1)\n",
+            "Requirement already satisfied: imageio in /usr/local/lib/python3.10/dist-packages (from imgaug->paddleocr) (2.31.6)\n",
+            "Requirement already satisfied: networkx>=2.2 in /usr/local/lib/python3.10/dist-packages (from scikit-image->paddleocr) (3.3)\n",
+            "Requirement already satisfied: tifffile>=2019.7.26 in /usr/local/lib/python3.10/dist-packages (from scikit-image->paddleocr) (2024.5.10)\n",
+            "Requirement already satisfied: PyWavelets>=1.1.1 in /usr/local/lib/python3.10/dist-packages (from scikit-image->paddleocr) (1.6.0)\n",
+            "Requirement already satisfied: packaging>=20.0 in /usr/local/lib/python3.10/dist-packages (from scikit-image->paddleocr) (24.0)\n",
+            "Requirement already satisfied: et-xmlfile in /usr/local/lib/python3.10/dist-packages (from openpyxl->paddleocr) (1.1.0)\n",
+            "Collecting PyMuPDF>=1.19.0 (from pdf2docx->paddleocr)\n",
+            "  Downloading PyMuPDF-1.24.4-cp310-none-manylinux2014_x86_64.whl (3.5 MB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m3.5/3.5 MB\u001b[0m \u001b[31m95.2 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hRequirement already satisfied: opencv-python-headless>=4.5 in /usr/local/lib/python3.10/dist-packages (from pdf2docx->paddleocr) (4.9.0.80)\n",
+            "Requirement already satisfied: typing-extensions>=4.9.0 in /usr/local/lib/python3.10/dist-packages (from python-docx->paddleocr) (4.11.0)\n",
+            "Collecting cssselect (from premailer->paddleocr)\n",
+            "  Downloading cssselect-1.2.0-py2.py3-none-any.whl (18 kB)\n",
+            "Collecting cssutils (from premailer->paddleocr)\n",
+            "  Downloading cssutils-2.11.0-py3-none-any.whl (398 kB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m398.2/398.2 kB\u001b[0m \u001b[31m37.9 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hRequirement already satisfied: requests in /usr/local/lib/python3.10/dist-packages (from premailer->paddleocr) (2.31.0)\n",
+            "Requirement already satisfied: cachetools in /usr/local/lib/python3.10/dist-packages (from premailer->paddleocr) (5.3.3)\n",
+            "Collecting bce-python-sdk (from visualdl->paddleocr)\n",
+            "  Downloading bce_python_sdk-0.9.10-py3-none-any.whl (342 kB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m342.3/342.3 kB\u001b[0m \u001b[31m36.2 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hRequirement already satisfied: flask>=1.1.1 in /usr/local/lib/python3.10/dist-packages (from visualdl->paddleocr) (2.2.5)\n",
+            "Collecting Flask-Babel>=3.0.0 (from visualdl->paddleocr)\n",
+            "  Downloading flask_babel-4.0.0-py3-none-any.whl (9.6 kB)\n",
+            "Requirement already satisfied: protobuf>=3.20.0 in /usr/local/lib/python3.10/dist-packages (from visualdl->paddleocr) (3.20.3)\n",
+            "Requirement already satisfied: pandas in /usr/local/lib/python3.10/dist-packages (from visualdl->paddleocr) (2.0.3)\n",
+            "Collecting rarfile (from visualdl->paddleocr)\n",
+            "  Downloading rarfile-4.2-py3-none-any.whl (29 kB)\n",
+            "Requirement already satisfied: psutil in /usr/local/lib/python3.10/dist-packages (from visualdl->paddleocr) (5.9.5)\n",
+            "Requirement already satisfied: Werkzeug>=2.2.2 in /usr/local/lib/python3.10/dist-packages (from flask>=1.1.1->visualdl->paddleocr) (3.0.3)\n",
+            "Requirement already satisfied: Jinja2>=3.0 in /usr/local/lib/python3.10/dist-packages (from flask>=1.1.1->visualdl->paddleocr) (3.1.4)\n",
+            "Requirement already satisfied: itsdangerous>=2.0 in /usr/local/lib/python3.10/dist-packages (from flask>=1.1.1->visualdl->paddleocr) (2.2.0)\n",
+            "Requirement already satisfied: click>=8.0 in /usr/local/lib/python3.10/dist-packages (from flask>=1.1.1->visualdl->paddleocr) (8.1.7)\n",
+            "Requirement already satisfied: Babel>=2.12 in /usr/local/lib/python3.10/dist-packages (from Flask-Babel>=3.0.0->visualdl->paddleocr) (2.15.0)\n",
+            "Requirement already satisfied: pytz>=2022.7 in /usr/local/lib/python3.10/dist-packages (from Flask-Babel>=3.0.0->visualdl->paddleocr) (2023.4)\n",
+            "Collecting Pillow>=10.0.0 (from paddleocr)\n",
+            "  Downloading Pillow-10.0.1-cp310-cp310-manylinux_2_28_x86_64.whl (3.6 MB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m3.6/3.6 MB\u001b[0m \u001b[31m97.3 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hCollecting PyMuPDFb==1.24.3 (from PyMuPDF>=1.19.0->pdf2docx->paddleocr)\n",
+            "  Downloading PyMuPDFb-1.24.3-py3-none-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (15.8 MB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m15.8/15.8 MB\u001b[0m \u001b[31m67.5 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hCollecting pycryptodome>=3.8.0 (from bce-python-sdk->visualdl->paddleocr)\n",
+            "  Downloading pycryptodome-3.20.0-cp35-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)\n",
+            "\u001b[2K     \u001b[90m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\u001b[0m \u001b[32m2.1/2.1 MB\u001b[0m \u001b[31m86.2 MB/s\u001b[0m eta \u001b[36m0:00:00\u001b[0m\n",
+            "\u001b[?25hRequirement already satisfied: future>=0.6.0 in /usr/local/lib/python3.10/dist-packages (from bce-python-sdk->visualdl->paddleocr) (0.18.3)\n",
+            "Requirement already satisfied: contourpy>=1.0.1 in /usr/local/lib/python3.10/dist-packages (from matplotlib->imgaug->paddleocr) (1.2.1)\n",
+            "Requirement already satisfied: cycler>=0.10 in /usr/local/lib/python3.10/dist-packages (from matplotlib->imgaug->paddleocr) (0.12.1)\n",
+            "Requirement already satisfied: kiwisolver>=1.0.1 in /usr/local/lib/python3.10/dist-packages (from matplotlib->imgaug->paddleocr) (1.4.5)\n",
+            "Requirement already satisfied: pyparsing>=2.3.1 in /usr/local/lib/python3.10/dist-packages (from matplotlib->imgaug->paddleocr) (3.1.2)\n",
+            "Requirement already satisfied: python-dateutil>=2.7 in /usr/local/lib/python3.10/dist-packages (from matplotlib->imgaug->paddleocr) (2.8.2)\n",
+            "Requirement already satisfied: tzdata>=2022.1 in /usr/local/lib/python3.10/dist-packages (from pandas->visualdl->paddleocr) (2024.1)\n",
+            "Requirement already satisfied: charset-normalizer<4,>=2 in /usr/local/lib/python3.10/dist-packages (from requests->premailer->paddleocr) (3.3.2)\n",
+            "Requirement already satisfied: idna<4,>=2.5 in /usr/local/lib/python3.10/dist-packages (from requests->premailer->paddleocr) (3.7)\n",
+            "Requirement already satisfied: urllib3<3,>=1.21.1 in /usr/local/lib/python3.10/dist-packages (from requests->premailer->paddleocr) (2.0.7)\n",
+            "Requirement already satisfied: certifi>=2017.4.17 in /usr/local/lib/python3.10/dist-packages (from requests->premailer->paddleocr) (2024.2.2)\n",
+            "Requirement already satisfied: MarkupSafe>=2.0 in /usr/local/lib/python3.10/dist-packages (from Jinja2>=3.0->flask>=1.1.1->visualdl->paddleocr) (2.1.5)\n",
+            "Building wheels for collected packages: fire\n",
+            "  Building wheel for fire (setup.py) ... \u001b[?25l\u001b[?25hdone\n",
+            "  Created wheel for fire: filename=fire-0.6.0-py2.py3-none-any.whl size=117029 sha256=554b71fdbcdb1c2964e966be116ec00a3c88b5be0a411919a13122200fc8e6cc\n",
+            "  Stored in directory: /root/.cache/pip/wheels/d6/6d/5d/5b73fa0f46d01a793713f8859201361e9e581ced8c75e5c6a3\n",
+            "Successfully built fire\n",
+            "Installing collected packages: pyclipper, lmdb, rarfile, rapidfuzz, python-docx, PyMuPDFb, pycryptodome, Pillow, opencv-python, opencv-contrib-python, fire, cssutils, cssselect, attrdict, PyMuPDF, premailer, bce-python-sdk, pdf2docx, Flask-Babel, visualdl, paddleocr\n",
+            "  Attempting uninstall: Pillow\n",
+            "    Found existing installation: Pillow 9.4.0\n",
+            "    Uninstalling Pillow-9.4.0:\n",
+            "      Successfully uninstalled Pillow-9.4.0\n",
+            "  Attempting uninstall: opencv-python\n",
+            "    Found existing installation: opencv-python 4.8.0.76\n",
+            "    Uninstalling opencv-python-4.8.0.76:\n",
+            "      Successfully uninstalled opencv-python-4.8.0.76\n",
+            "  Attempting uninstall: opencv-contrib-python\n",
+            "    Found existing installation: opencv-contrib-python 4.8.0.76\n",
+            "    Uninstalling opencv-contrib-python-4.8.0.76:\n",
+            "      Successfully uninstalled opencv-contrib-python-4.8.0.76\n",
+            "Successfully installed Flask-Babel-4.0.0 Pillow-10.0.1 PyMuPDF-1.24.4 PyMuPDFb-1.24.3 attrdict-2.0.1 bce-python-sdk-0.9.10 cssselect-1.2.0 cssutils-2.11.0 fire-0.6.0 lmdb-1.4.1 opencv-contrib-python-4.6.0.66 opencv-python-4.6.0.66 paddleocr-2.7.3 pdf2docx-0.5.8 premailer-3.10.0 pyclipper-1.3.0.post5 pycryptodome-3.20.0 python-docx-1.1.2 rapidfuzz-3.9.0 rarfile-4.2 visualdl-2.5.3\n"
+          ]
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "application/vnd.colab-display-data+json": {
+              "pip_warning": {
+                "packages": [
+                  "PIL"
+                ]
+              },
+              "id": "8d547b809209422791163ee02a23b47f"
+            }
+          },
+          "metadata": {}
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "!git clone https://github.com/PaddlePaddle/PaddleOCR"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "ETUKNuguAuMF",
+        "outputId": "11f5b14d-6627-48f0-a49f-18faf6507106",
+        "collapsed": true
+      },
+      "execution_count": 80,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Cloning into 'PaddleOCR'...\n",
+            "remote: Enumerating objects: 48785, done.\u001b[K\n",
+            "remote: Counting objects: 100% (40/40), done.\u001b[K\n",
+            "remote: Compressing objects: 100% (40/40), done.\u001b[K\n",
+            "remote: Total 48785 (delta 10), reused 7 (delta 0), pack-reused 48745\u001b[K\n",
+            "Receiving objects: 100% (48785/48785), 345.71 MiB | 27.76 MiB/s, done.\n",
+            "Resolving deltas: 100% (34513/34513), done.\n",
+            "Updating files: 100% (1802/1802), done.\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from paddleocr import PaddleOCR, draw_ocr\n",
+        "from matplotlib import pyplot as plt\n",
+        "import cv2\n",
+        "import os"
+      ],
+      "metadata": {
+        "id": "0x72qFdUewpa"
+      },
+      "execution_count": 83,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "ocr_model=PaddleOCR(lang='en')"
+      ],
+      "metadata": {
+        "id": "enikCVMEGMxs",
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "collapsed": true,
+        "outputId": "3ae63d24-66bf-44ba-eafe-d7bbf1d631e5"
+      },
+      "execution_count": 11,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "[2024/05/19 13:07:12] ppocr DEBUG: Namespace(help='==SUPPRESS==', use_gpu=False, use_xpu=False, use_npu=False, ir_optim=True, use_tensorrt=False, min_subgraph_size=15, precision='fp32', gpu_mem=500, gpu_id=0, image_dir=None, page_num=0, det_algorithm='DB', det_model_dir='/root/.paddleocr/whl/det/en/en_PP-OCRv3_det_infer', det_limit_side_len=960, det_limit_type='max', det_box_type='quad', det_db_thresh=0.3, det_db_box_thresh=0.6, det_db_unclip_ratio=1.5, max_batch_size=10, use_dilation=False, det_db_score_mode='fast', det_east_score_thresh=0.8, det_east_cover_thresh=0.1, det_east_nms_thresh=0.2, det_sast_score_thresh=0.5, det_sast_nms_thresh=0.2, det_pse_thresh=0, det_pse_box_thresh=0.85, det_pse_min_area=16, det_pse_scale=1, scales=[8, 16, 32], alpha=1.0, beta=1.0, fourier_degree=5, rec_algorithm='SVTR_LCNet', rec_model_dir='/root/.paddleocr/whl/rec/en/en_PP-OCRv4_rec_infer', rec_image_inverse=True, rec_image_shape='3, 48, 320', rec_batch_num=6, max_text_length=25, rec_char_dict_path='/usr/local/lib/python3.10/dist-packages/paddleocr/ppocr/utils/en_dict.txt', use_space_char=True, vis_font_path='./doc/fonts/simfang.ttf', drop_score=0.5, e2e_algorithm='PGNet', e2e_model_dir=None, e2e_limit_side_len=768, e2e_limit_type='max', e2e_pgnet_score_thresh=0.5, e2e_char_dict_path='./ppocr/utils/ic15_dict.txt', e2e_pgnet_valid_set='totaltext', e2e_pgnet_mode='fast', use_angle_cls=False, cls_model_dir='/root/.paddleocr/whl/cls/ch_ppocr_mobile_v2.0_cls_infer', cls_image_shape='3, 48, 192', label_list=['0', '180'], cls_batch_num=6, cls_thresh=0.9, enable_mkldnn=False, cpu_threads=10, use_pdserving=False, warmup=False, sr_model_dir=None, sr_image_shape='3, 32, 128', sr_batch_num=1, draw_img_save_dir='./inference_results', save_crop_res=False, crop_res_save_dir='./output', use_mp=False, total_process_num=1, process_id=0, benchmark=False, save_log_path='./log_output/', show_log=True, use_onnx=False, output='./output', table_max_len=488, table_algorithm='TableAttn', table_model_dir=None, merge_no_span_structure=True, table_char_dict_path=None, layout_model_dir=None, layout_dict_path=None, layout_score_threshold=0.5, layout_nms_threshold=0.5, kie_algorithm='LayoutXLM', ser_model_dir=None, re_model_dir=None, use_visual_backbone=True, ser_dict_path='../train_data/XFUND/class_list_xfun.txt', ocr_order_method=None, mode='structure', image_orientation=False, layout=True, table=True, ocr=True, recovery=False, use_pdf2docx_api=False, invert=False, binarize=False, alphacolor=(255, 255, 255), lang='en', det=True, rec=True, type='ocr', ocr_version='PP-OCRv4', structure_version='PP-StructureV2')\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "image_path = os .path.join(\"/content/Drug 1.jpg\")"
+      ],
+      "metadata": {
+        "id": "-3uQ5I5J7a5S"
+      },
+      "execution_count": 68,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "image_path"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 35
+        },
+        "collapsed": true,
+        "id": "4b08zWmi874z",
+        "outputId": "c82bdac7-df30-42db-c328-37e1c18bde1d"
+      },
+      "execution_count": 69,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "'/content/Drug 1.jpg'"
+            ],
+            "application/vnd.google.colaboratory.intrinsic+json": {
+              "type": "string"
+            }
+          },
+          "metadata": {},
+          "execution_count": 69
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "result= ocr_model.ocr(image_path)"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "collapsed": true,
+        "id": "ceNTMx2Z89xG",
+        "outputId": "4fc0d355-6eff-4d66-e7c6-88b4823a2edc"
+      },
+      "execution_count": 70,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "[2024/05/19 13:36:09] ppocr WARNING: Since the angle classifier is not initialized, it will not be used during the forward process\n",
+            "[2024/05/19 13:36:09] ppocr DEBUG: dt_boxes num : 6, elapsed : 0.0834043025970459\n",
+            "[2024/05/19 13:36:09] ppocr DEBUG: rec_res num  : 6, elapsed : 0.25127291679382324\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "result"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "collapsed": true,
+        "id": "7u2ZAUlE9M0M",
+        "outputId": "970349f8-743a-4b6e-9df5-7051e4a08fbd"
+      },
+      "execution_count": 71,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "[[[[[219.0, 199.0], [288.0, 202.0], [288.0, 216.0], [218.0, 214.0]],\n",
+              "   ('50MCG TABLETS', 0.9500203728675842)],\n",
+              "  [[[217.0, 218.0], [337.0, 215.0], [338.0, 232.0], [218.0, 235.0]],\n",
+              "   ('TAKE ONE TABLET BY', 0.9259032011032104)],\n",
+              "  [[[219.0, 232.0], [285.0, 234.0], [285.0, 249.0], [218.0, 246.0]],\n",
+              "   ('EVERY DAY', 0.9418787360191345)],\n",
+              "  [[[219.0, 257.0], [254.0, 260.0], [253.0, 274.0], [218.0, 272.0]],\n",
+              "   ('QTY90', 0.9742363691329956)],\n",
+              "  [[[218.0, 289.0], [293.0, 293.0], [292.0, 306.0], [217.0, 303.0]],\n",
+              "   (' Fied12-01-2019', 0.7921862006187439)]]]"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 71
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "result[0][1]"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "collapsed": true,
+        "id": "au2e6sfH_Twi",
+        "outputId": "5da9865d-988d-4a43-a8c0-a74a3a7d770c"
+      },
+      "execution_count": 72,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "[[[217.0, 218.0], [337.0, 215.0], [338.0, 232.0], [218.0, 235.0]],\n",
+              " ('TAKE ONE TABLET BY', 0.9259032011032104)]"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 72
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "result[0][1]"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "collapsed": true,
+        "id": "hix27abK9lxO",
+        "outputId": "d994b03f-62cf-44a0-b071-3a33f0d8b550"
+      },
+      "execution_count": 73,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "[[[217.0, 218.0], [337.0, 215.0], [338.0, 232.0], [218.0, 235.0]],\n",
+              " ('TAKE ONE TABLET BY', 0.9259032011032104)]"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 73
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "for res in result:\n",
+        "  print(res[0][1])"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "collapsed": true,
+        "id": "dJnP9Tja95yp",
+        "outputId": "20cd5f8d-81d9-450b-85df-982fefb5541d"
+      },
+      "execution_count": 74,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "('50MCG TABLETS', 0.9500203728675842)\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "[res[0][1]for res in result]"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "collapsed": true,
+        "id": "ZW15O0vz_AOb",
+        "outputId": "f415985c-1cfe-4152-a7aa-249e84cd378e"
+      },
+      "execution_count": 76,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "[('50MCG TABLETS', 0.9500203728675842)]"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 76
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "boxes= [res[0] for res in result]\n",
+        "text= [res[1][0] for res in result]\n",
+        "scores= [res[1][1] for res in result]"
+      ],
+      "metadata": {
+        "id": "ZUmR2ufiALvf"
+      },
+      "execution_count": 77,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "boxes"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "collapsed": true,
+        "id": "pS9HCAhjFGKQ",
+        "outputId": "0cc1e1f5-a940-4493-bd31-92f5f574fa5e"
+      },
+      "execution_count": 78,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "[[[[219.0, 199.0], [288.0, 202.0], [288.0, 216.0], [218.0, 214.0]],\n",
+              "  ('50MCG TABLETS', 0.9500203728675842)]]"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 78
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "scores"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "collapsed": true,
+        "id": "1fUwpOtZFGw9",
+        "outputId": "23af8616-f3b5-4bf2-a79f-ed8ac919ca6e"
+      },
+      "execution_count": 79,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "[('TAKE ONE TABLET BY', 0.9259032011032104)]"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 79
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "font_path = os.path.join(\"doc/fonts/latin.ttf\")"
+      ],
+      "metadata": {
+        "id": "fGA-NJkTFTvV"
+      },
+      "execution_count": 88,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "img = cv2.imread(image_path)\n",
+        "img =cv2.cvtColor(img, cv2.COLOR_BGR2RGB)"
+      ],
+      "metadata": {
+        "id": "dlxUqwdpINBz"
+      },
+      "execution_count": 89,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "plt.figure(figsize=(15,15))\n",
+        "annotated = draw_ocr(img, boxes, text, scores, font_path=font_path)\n",
+        "plt.imshow(annotated)\n",
+        "plt.show()#showing the image"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 341
+        },
+        "collapsed": true,
+        "id": "TfIuQ8MVNFG7",
+        "outputId": "beea2b6a-1734-4ad7-abaa-945eacdf8efe"
+      },
+      "execution_count": 97,
+      "outputs": [
+        {
+          "output_type": "error",
+          "ename": "TypeError",
+          "evalue": "'<' not supported between instances of 'tuple' and 'float'",
+          "traceback": [
+            "\u001b[0;31m---------------------------------------------------------------------------\u001b[0m",
+            "\u001b[0;31mTypeError\u001b[0m                                 Traceback (most recent call last)",
+            "\u001b[0;32m<ipython-input-97-87e16ebd20d1>\u001b[0m in \u001b[0;36m<cell line: 2>\u001b[0;34m()\u001b[0m\n\u001b[1;32m      1\u001b[0m \u001b[0mplt\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mfigure\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mfigsize\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;36m15\u001b[0m\u001b[0;34m,\u001b[0m\u001b[0;36m15\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m----> 2\u001b[0;31m \u001b[0mannotated\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mdraw_ocr\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mimg\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mboxes\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mtext\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mscores\u001b[0m\u001b[0;34m,\u001b[0m \u001b[0mfont_path\u001b[0m\u001b[0;34m=\u001b[0m\u001b[0mfont_path\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0m\u001b[1;32m      3\u001b[0m \u001b[0mplt\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mimshow\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mannotated\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m      4\u001b[0m \u001b[0mplt\u001b[0m\u001b[0;34m.\u001b[0m\u001b[0mshow\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;31m#showing the image\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;32m/usr/local/lib/python3.10/dist-packages/paddleocr/tools/infer/utility.py\u001b[0m in \u001b[0;36mdraw_ocr\u001b[0;34m(image, boxes, txts, scores, drop_score, font_path)\u001b[0m\n\u001b[1;32m    385\u001b[0m     \u001b[0mbox_num\u001b[0m \u001b[0;34m=\u001b[0m \u001b[0mlen\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mboxes\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[1;32m    386\u001b[0m     \u001b[0;32mfor\u001b[0m \u001b[0mi\u001b[0m \u001b[0;32min\u001b[0m \u001b[0mrange\u001b[0m\u001b[0;34m(\u001b[0m\u001b[0mbox_num\u001b[0m\u001b[0;34m)\u001b[0m\u001b[0;34m:\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n\u001b[0;32m--> 387\u001b[0;31m         if scores is not None and (scores[i] < drop_score or\n\u001b[0m\u001b[1;32m    388\u001b[0m                                    math.isnan(scores[i])):\n\u001b[1;32m    389\u001b[0m             \u001b[0;32mcontinue\u001b[0m\u001b[0;34m\u001b[0m\u001b[0;34m\u001b[0m\u001b[0m\n",
+            "\u001b[0;31mTypeError\u001b[0m: '<' not supported between instances of 'tuple' and 'float'"
+          ]
+        },
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<Figure size 1500x1500 with 0 Axes>"
+            ]
+          },
+          "metadata": {}
+        }
+      ]
+    }
+  ]
+}
